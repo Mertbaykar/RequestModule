@@ -1,0 +1,56 @@
+﻿@using Request.Module.Application.Responses
+@using Request.Module.Web.Models.ViewModel
+@using Request.Module.Web.Views.Shared.Components
+
+@{
+    Layout = "_Layout";
+}
+
+ @model LayoutModel<List<LeaveRequestResponse>>
+
+<div class="toolbar" id="kt_toolbar">
+
+    <div id="kt_toolbar_container" class="container-fluid d-flex flex-stack">
+
+        <div data-kt-swapper="true" data-kt-swapper-mode="prepend" data-kt-swapper-parent="{default: '#kt_content_container', 'lg': '#kt_toolbar_container'}" class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
+
+            <h1 class="d-flex text-dark fw-bolder fs-3 align-items-center my-1">
+                @* İzin Talebi Oluştur *@
+                <span class="h-20px border-1 border-gray-200 border-start ms-3 mx-2 me-1"></span>
+
+                <span class="text-muted fs-7 fw-bold mt-2 ml-5">  </span>
+            </h1>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="post d-flex flex-column-fluid" id="kt_post">
+    <!--begin::Container-->
+    <div id="kt_content_container" class="container-fluid">
+        <!--begin::Stats-->
+        <!--end::Toolbar-->
+        <!--begin::Row-->
+        <div class="row g-6 g-xl-9">
+            <!--begin::Col-->
+            <!--begin::Card-->
+            @(await Html.RenderComponentAsync<LeaveRequestsPage>(RenderMode.ServerPrerendered, new { LeaveRequestList = Model.PageModel }))
+            <!--end::Card-->
+        </div>
+
+    </div>
+    <!--end::Container-->
+</div>
+
+<script>
+    function openModal(modalName) {
+        $('#' + modalName).modal('show')
+    }
+
+    function closeModal(modalName) {
+        $('#' + modalName).modal('hide')
+    }
+</script>
+
