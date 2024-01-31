@@ -7,11 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Aggregates\CumulativeLeaveRequestAggregate\Events\" />
     <Folder Include="Aggregates\CumulativeLeaveRequestAggregate\Handlers\" />
-    <Folder Include="Aggregates\NotificationAggregate\Events\" />
     <Folder Include="Aggregates\NotificationAggregate\Handlers\" />
-    <Folder Include="Aggregates\UserAggregate\Events\" />
+    <Folder Include="Aggregates\NotificationAggregate\Services\" />
     <Folder Include="Aggregates\UserAggregate\Handlers\" />
     <Folder Include="Aggregates\UserAggregate\Services\" />
   </ItemGroup>

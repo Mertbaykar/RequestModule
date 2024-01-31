@@ -1,12 +1,14 @@
 ﻿using Ardalis.GuardClauses;
 using Ardalis.SharedKernel;
 using MediatR;
+using Request.Module.Domain.Base;
 using Request.Module.Domain.Exceptions;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Request.Module.Domain
 {
-    public class CumulativeLeaveRequest : EntityBase<Guid>, IAggregateRoot
+    public class CumulativeLeaveRequest : EntityBaseCustom<Guid>, IAggregateRoot
     {
         private const int hoursperDay = 8;
 
@@ -31,12 +33,24 @@ namespace Request.Module.Domain
 
         }
 
-        public CumulativeLeaveRequest(LeaveType leaveType, ADUser createdBy, DateTime startDate, DateTime endDate)
+        public static CumulativeLeaveRequest Create(LeaveType leaveType, Guid createdById, DateTime startDate, DateTime endDate)
         {
-            LeaveType = leaveType;
-            User = createdBy;
-            UserId = Guard.Against.Default(createdBy.Id, nameof(createdBy.Id));
+            
+            var cumulativeLeaveRequest = new CumulativeLeaveRequest();
+            cumulativeLeaveRequest.LeaveType = leaveType;
+            cumulativeLeaveRequest.UserId = Guard.Against.Default(createdById, nameof(createdById));
 
+            ValidateDates(startDate, endDate);
+            int totalHours = 0;
+
+            ValidateTotalHoursAfterCumulativeLeaveRequestCreation(startDate, endDate, ref totalHours, cumulativeLeaveRequest);
+            cumulativeLeaveRequest.Year = startDate.Year;
+            cumulativeLeaveRequest.TotalHours = totalHours;
+            return cumulativeLeaveRequest;
+        }
+
+        private static void ValidateDates(DateTime startDate, DateTime endDate)
+        {
             if (startDate <= DateTime.Today)
                 throw new DateException("Geçmiş tarihlerde izin alınamaz.");
             if (startDate > endDate)
@@ -44,11 +58,6 @@ namespace Request.Module.Domain
             if (startDate.Year != endDate.Year)
                 throw new DateException("Başlangıç ile bitiş tarihi aynı yıl içinde olmalıdır.");
 
-            int totalHours = 0;
-
-            ValidateTotalHoursAfterCumulativeLeaveRequestCreation(startDate, endDate, ref totalHours);
-            TotalHours = totalHours;
-            Year = startDate.Year;
         }
 
         /// <summary>
@@ -59,18 +68,18 @@ namespace Request.Module.Domain
         /// <param name="totalHours"></param>
         /// <returns></returns>
         /// <exception cref="DateException"></exception>
-        private void ValidateTotalHoursAfterCumulativeLeaveRequestCreation(DateTime startDate, DateTime endDate, ref int totalHours)
+        private static void ValidateTotalHoursAfterCumulativeLeaveRequestCreation(DateTime startDate, DateTime endDate, ref int totalHours, CumulativeLeaveRequest cumulativeLeaveRequest)
         {
             totalHours = GetTotalHours(startDate, endDate);
 
-            if (this.LeaveType == LeaveType.AnnualLeave)
+            if (cumulativeLeaveRequest.LeaveType == LeaveType.AnnualLeave)
             {
                 if (totalHours >= MaxAnnualLeaveHoursWithTolerance)
                 {
                     var diff = totalHours - MaxAnnualLeaveHoursWithTolerance;
                     string diffExplanation = diff == 0 ? "limite ulaşan talep yaptı" : $"limiti {diff / hoursperDay} gün aşan talep yaptı";
 
-                    throw new DateException($"{User.FullName} {LeaveType} izin çeşidi için  {diffExplanation}");
+                    throw new DateException($"{cumulativeLeaveRequest.User.FullName} {cumulativeLeaveRequest.LeaveType} izin çeşidi için  {diffExplanation}");
                 }
             }
             else
@@ -81,13 +90,13 @@ namespace Request.Module.Domain
                     string diffExplanation = diff == 0 ? "limite ulaşan talep yaptı" : $"limiti {diff / hoursperDay} gün aşan talep yaptı";
 
                     // exception fırlat ve eklenen LeaveRequest'in workflow'unu exception yap.
-                    throw new DateException($"{User.FullName} {LeaveType} izin çeşidi için  {diffExplanation}");
+                    throw new DateException($"{cumulativeLeaveRequest.User.FullName} {cumulativeLeaveRequest.LeaveType} izin çeşidi için  {diffExplanation}");
                 }
             }
 
         }
 
-        private int GetTotalHours(DateTime startDate, DateTime endDate)
+        private static int GetTotalHours(DateTime startDate, DateTime endDate)
         {
             int totalHours = 0;
 

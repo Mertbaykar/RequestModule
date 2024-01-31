@@ -28,7 +28,7 @@ namespace Request.Module.Infrastructure.Persistence.Data.Repository
             {
                 try
                 {
-                    var createdCumulativeLeaveRequest = new CumulativeLeaveRequest(createdLeaveRequest.LeaveType, createdLeaveRequest.CreatedBy, createdLeaveRequest.StartDate, createdLeaveRequest.EndDate);
+                    var createdCumulativeLeaveRequest = CumulativeLeaveRequest.Create(createdLeaveRequest.LeaveType, createdLeaveRequest.CreatedById, createdLeaveRequest.StartDate, createdLeaveRequest.EndDate);
                     await AddAsync(createdCumulativeLeaveRequest);
                 }
                 catch (Exception ex)

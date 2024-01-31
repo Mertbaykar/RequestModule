@@ -9,10 +9,10 @@ using Request.Module.Infrastructure.Persistence.Data;
 
 #nullable disable
 
-namespace Request.Module.Infrastructure.Migrations
+namespace Request.Module.Web.Migrations
 {
     [DbContext(typeof(RequestContext))]
-    [Migration("20240124122645_Init")]
+    [Migration("20240131114013_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -25,120 +25,7 @@ namespace Request.Module.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Request.Module.Application.Core.CumulativeLeaveRequestAggregate.CumulativeLeaveRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("LeaveType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalHours")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CumulativeLeaveRequests");
-                });
-
-            modelBuilder.Entity("Request.Module.Application.Core.LeaveRequestAggregate.LeaveRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("AssignedUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CreatedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("FormNumber")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FormNumber"));
-
-                    b.Property<DateTime?>("LastModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("LastModifiedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("LeaveType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RequestFormNumber")
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("nvarchar(max)")
-                        .HasComputedColumnSql("('LRF-' + CONVERT(VARCHAR(50), [FormNumber]))", false);
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Workflow")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssignedUserId");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("LastModifiedById");
-
-                    b.ToTable("LeaveRequests");
-                });
-
-            modelBuilder.Entity("Request.Module.Application.Core.NotificationAggregate.Notification", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CumulativeLeaveRequestId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CumulativeLeaveRequestId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("Request.Module.Application.Core.UserAggregate.ADUser", b =>
+            modelBuilder.Entity("Request.Module.Domain.ADUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -197,9 +84,130 @@ namespace Request.Module.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Request.Module.Application.Core.CumulativeLeaveRequestAggregate.CumulativeLeaveRequest", b =>
+            modelBuilder.Entity("Request.Module.Domain.CumulativeLeaveRequest", b =>
                 {
-                    b.HasOne("Request.Module.Application.Core.UserAggregate.ADUser", "User")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("LeaveType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalHours")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CumulativeLeaveRequests");
+                });
+
+            modelBuilder.Entity("Request.Module.Domain.LeaveRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AssignedUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FormNumber")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValueSql("NEXT VALUE FOR RequestFormNumberSequence");
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("LeaveType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RequestFormNumber")
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("nvarchar(max)")
+                        .HasComputedColumnSql("('LRF-000' + CONVERT(VARCHAR(50), [FormNumber]))", false);
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Workflow")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedUserId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("LastModifiedById");
+
+                    b.ToTable("LeaveRequests");
+                });
+
+            modelBuilder.Entity("Request.Module.Domain.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CumulativeLeaveRequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CumulativeLeaveRequestId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("Request.Module.Domain.ADUser", b =>
+                {
+                    b.HasOne("Request.Module.Domain.ADUser", "Manager")
+                        .WithMany()
+                        .HasForeignKey("ManagerId");
+
+                    b.Navigation("Manager");
+                });
+
+            modelBuilder.Entity("Request.Module.Domain.CumulativeLeaveRequest", b =>
+                {
+                    b.HasOne("Request.Module.Domain.ADUser", "User")
                         .WithMany("CumulativeLeaveRequests")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -208,19 +216,19 @@ namespace Request.Module.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Request.Module.Application.Core.LeaveRequestAggregate.LeaveRequest", b =>
+            modelBuilder.Entity("Request.Module.Domain.LeaveRequest", b =>
                 {
-                    b.HasOne("Request.Module.Application.Core.UserAggregate.ADUser", "AssignedUser")
+                    b.HasOne("Request.Module.Domain.ADUser", "AssignedUser")
                         .WithMany()
                         .HasForeignKey("AssignedUserId");
 
-                    b.HasOne("Request.Module.Application.Core.UserAggregate.ADUser", "CreatedBy")
+                    b.HasOne("Request.Module.Domain.ADUser", "CreatedBy")
                         .WithMany("LeaveRequests")
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Request.Module.Application.Core.UserAggregate.ADUser", "LastModifiedBy")
+                    b.HasOne("Request.Module.Domain.ADUser", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById");
 
@@ -231,15 +239,15 @@ namespace Request.Module.Infrastructure.Migrations
                     b.Navigation("LastModifiedBy");
                 });
 
-            modelBuilder.Entity("Request.Module.Application.Core.NotificationAggregate.Notification", b =>
+            modelBuilder.Entity("Request.Module.Domain.Notification", b =>
                 {
-                    b.HasOne("Request.Module.Application.Core.CumulativeLeaveRequestAggregate.CumulativeLeaveRequest", "CumulativeLeaveRequest")
+                    b.HasOne("Request.Module.Domain.CumulativeLeaveRequest", "CumulativeLeaveRequest")
                         .WithMany("Notifications")
                         .HasForeignKey("CumulativeLeaveRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Request.Module.Application.Core.UserAggregate.ADUser", "User")
+                    b.HasOne("Request.Module.Domain.ADUser", "User")
                         .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -250,26 +258,17 @@ namespace Request.Module.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Request.Module.Application.Core.UserAggregate.ADUser", b =>
-                {
-                    b.HasOne("Request.Module.Application.Core.UserAggregate.ADUser", "Manager")
-                        .WithMany()
-                        .HasForeignKey("ManagerId");
-
-                    b.Navigation("Manager");
-                });
-
-            modelBuilder.Entity("Request.Module.Application.Core.CumulativeLeaveRequestAggregate.CumulativeLeaveRequest", b =>
-                {
-                    b.Navigation("Notifications");
-                });
-
-            modelBuilder.Entity("Request.Module.Application.Core.UserAggregate.ADUser", b =>
+            modelBuilder.Entity("Request.Module.Domain.ADUser", b =>
                 {
                     b.Navigation("CumulativeLeaveRequests");
 
                     b.Navigation("LeaveRequests");
 
+                    b.Navigation("Notifications");
+                });
+
+            modelBuilder.Entity("Request.Module.Domain.CumulativeLeaveRequest", b =>
+                {
                     b.Navigation("Notifications");
                 });
 #pragma warning restore 612, 618

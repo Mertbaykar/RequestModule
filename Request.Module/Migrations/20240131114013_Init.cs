@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace Request.Module.Infrastructure.Migrations
+namespace Request.Module.Web.Migrations
 {
     /// <inheritdoc />
     public partial class Init : Migration
@@ -13,6 +13,8 @@ namespace Request.Module.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("CREATE SEQUENCE RequestFormNumberSequence AS INT START WITH 1 INCREMENT BY 1;");
+
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -60,9 +62,8 @@ namespace Request.Module.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FormNumber = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RequestFormNumber = table.Column<string>(type: "nvarchar(max)", nullable: false, computedColumnSql: "('LRF-' + CONVERT(VARCHAR(50), [FormNumber]))", stored: false),
+                    FormNumber = table.Column<int>(type: "int", nullable: false, defaultValueSql: "NEXT VALUE FOR RequestFormNumberSequence"),
+                    RequestFormNumber = table.Column<string>(type: "nvarchar(max)", nullable: false, computedColumnSql: "('LRF-000' + CONVERT(VARCHAR(50), [FormNumber]))", stored: false),
                     LeaveType = table.Column<int>(type: "int", nullable: false),
                     Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -102,8 +103,8 @@ namespace Request.Module.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CumulativeLeaveRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    CumulativeLeaveRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -132,10 +133,10 @@ namespace Request.Module.Infrastructure.Migrations
                     { new Guid("23591451-1cf1-46a5-907a-ee3e52abe394"), "kemal.sunal@negzel.net", "Kemal", "Sunal", new Guid("59fb152a-2d59-435d-8fc1-cbc35c0f1d82"), 20 }
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_CumulativeLeaveRequests_UserId",
-                table: "CumulativeLeaveRequests",
-                column: "UserId");
+            //migrationBuilder.CreateIndex(
+            //    name: "IX_CumulativeLeaveRequests_UserId",
+            //    table: "CumulativeLeaveRequests",
+            //    column: "UserId");
 
             //migrationBuilder.CreateIndex(
             //    name: "IX_LeaveRequests_AssignedUserId",
@@ -171,6 +172,8 @@ namespace Request.Module.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("DROP SEQUENCE IF EXISTS RequestFormNumberSequence;");
+
             migrationBuilder.DropTable(
                 name: "LeaveRequests");
 

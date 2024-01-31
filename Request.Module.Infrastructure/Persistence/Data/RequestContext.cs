@@ -10,19 +10,14 @@ namespace Request.Module.Infrastructure.Persistence.Data
 {
     public class RequestContext : DbContext
     {
-        private readonly IDomainEventDispatcher? _dispatcher;
+        private readonly IDomainEventDispatcherCustom? _dispatcher;
 
         public RequestContext(DbContextOptions<RequestContext> options,
-          IDomainEventDispatcher? dispatcher)
+          IDomainEventDispatcherCustom? dispatcher)
             : base(options)
         {
             _dispatcher = dispatcher;
         }
-
-        //public RequestContext(DbContextOptions<RequestContext> options)
-        //  : base(options)
-        //{
-        //}
 
         public DbSet<ADUser> Users { get; set; }
         public DbSet<LeaveRequest> LeaveRequests { get; set; }
@@ -40,7 +35,7 @@ namespace Request.Module.Infrastructure.Persistence.Data
             // Notification gruplama için işe yarar
             var now = DateTime.Now;
 
-            ChangeTracker.Entries<EntityBase<Guid>>()
+            ChangeTracker.Entries<EntityBaseCustom<Guid>>().Where(x=> x.State != EntityState.Unchanged)
                .ToList().ForEach(entry =>
                {
                    if (entry.Entity is EntityModifyDate entityModifyDate)
@@ -81,7 +76,7 @@ namespace Request.Module.Infrastructure.Persistence.Data
             if (_dispatcher == null) return result;
 
             // dispatch events only if save was successful
-            var entitiesWithEvents = ChangeTracker.Entries<EntityBase>()
+            var entitiesWithEvents = ChangeTracker.Entries<EntityBaseCustom<Guid>>()
                 .Select(e => e.Entity)
                 .Where(e => e.DomainEvents.Any())
                 .ToArray();

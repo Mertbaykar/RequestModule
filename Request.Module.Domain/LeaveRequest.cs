@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Request.Module.Domain.Base;
+using Request.Module.Domain.Events;
 using Request.Module.Domain.Exceptions;
 using Request.Module.Domain.Responses;
 using System;
@@ -17,53 +18,63 @@ namespace Request.Module.Domain
 
         private LeaveRequest()
         {
-            
+
         }
 
-        public LeaveRequest(LeaveType leaveType, string reason, DateTime startDate, DateTime endDate, ADUserResponse createdBy)
+        public static LeaveRequest Create(LeaveType leaveType, string reason, DateTime startDate, DateTime endDate, ADUserResponse createdBy)
         {
-            LeaveType = leaveType;
-            Reason = reason;
-            StartDate = Guard.Against.Default(startDate, nameof(startDate));
-            EndDate = Guard.Against.Default(endDate, nameof(endDate));
+            var leaveRequest = new LeaveRequest();
+            leaveRequest.LeaveType = leaveType;
+            leaveRequest.Reason = reason;
+            leaveRequest.StartDate = Guard.Against.Default(startDate, nameof(startDate));
+            leaveRequest.EndDate = Guard.Against.Default(endDate, nameof(endDate));
 
-            if(startDate <= DateTime.Today)
+            ValidateDates(startDate, endDate);
+            leaveRequest.CreatedById = Guard.Against.Default(createdBy.Id, nameof(createdBy.Id));
+
+            HandleBusinessLogic(leaveRequest, createdBy);
+            leaveRequest.RegisterDomainEvent(new LeaveRequestCreatedEvent(leaveRequest));
+            return leaveRequest;
+        }
+
+        private static void ValidateDates(DateTime startDate, DateTime endDate)
+        {
+            if (startDate <= DateTime.Today)
                 throw new DateException("Geçmiş tarih için izin alınamaz.");
             if (startDate > endDate)
                 throw new DateException("Başlangıç tarihi Bitiş tarihinden sonra olamaz.");
             if (startDate.Year != endDate.Year)
                 throw new DateException("İzinler aynı yıl içindeki tarihlerde alınmalıdır.");
-            if(GetTotalHours(startDate,endDate) == 0)
+            if (GetTotalHours(startDate, endDate) == 0)
                 throw new DateException("Resmi tatiller için izin talep edilemez.");
+        }
 
-
-            CreatedById = Guard.Against.Default(createdBy.Id, nameof(createdBy.Id));
-            //CreatedBy = createdBy;
-
+        private static void HandleBusinessLogic(LeaveRequest leaveRequest, ADUserResponse createdBy)
+        {
             #region Business Logic
 
             if (createdBy.UserType == UserType.WhiteCollarEmployee)
             {
-                Workflow = Workflow.Pending;
-                AssignedUserId = Guard.Against.Default(createdBy.Manager.Id, nameof(createdBy.Manager.Id));
+                leaveRequest.Workflow = Workflow.Pending;
+                leaveRequest.AssignedUserId = Guard.Against.Default(createdBy.Manager.Id, nameof(createdBy.Manager.Id));
             }
             else if (createdBy.UserType == UserType.BlueCollarEmployee)
             {
-                if (leaveType == LeaveType.AnnualLeave)
+                if (leaveRequest.LeaveType == LeaveType.AnnualLeave)
                 {
-                    Workflow = Workflow.Pending;
-                    AssignedUserId = Guard.Against.Default(createdBy.Manager.Manager.Id, nameof(createdBy.Manager.Manager.Id));
+                    leaveRequest.Workflow = Workflow.Pending;
+                    leaveRequest.AssignedUserId = Guard.Against.Default(createdBy.Manager.Manager.Id, nameof(createdBy.Manager.Manager.Id));
                 }
-                else if (leaveType == LeaveType.ExcusedAbsence)
+                else if (leaveRequest.LeaveType == LeaveType.ExcusedAbsence)
                 {
-                    Workflow = Workflow.Pending;
-                    AssignedUserId = Guard.Against.Default(createdBy.Manager.Id, nameof(createdBy.Manager.Id));
+                    leaveRequest.Workflow = Workflow.Pending;
+                    leaveRequest.AssignedUserId = Guard.Against.Default(createdBy.Manager.Id, nameof(createdBy.Manager.Id));
                 }
             }
             else if (createdBy.UserType == UserType.Manager)
             {
-                Workflow = Workflow.None;
-                AssignedUserId = null;
+                leaveRequest.Workflow = Workflow.None;
+                leaveRequest.AssignedUserId = null;
             }
 
             #endregion
@@ -74,7 +85,6 @@ namespace Request.Module.Domain
             this.Workflow = workflow;
         }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int FormNumber { get; private set; }
         public string RequestFormNumber { get; private set; }
         public LeaveType LeaveType { get; private set; }
@@ -95,7 +105,7 @@ namespace Request.Module.Domain
         public Guid? LastModifiedById { get; private set; }
         public ADUser LastModifiedBy { get; private set; }
 
-        public int GetTotalHours(DateTime startDate, DateTime endDate)
+        public static int GetTotalHours(DateTime startDate, DateTime endDate)
         {
             int totalHours = 0;
 

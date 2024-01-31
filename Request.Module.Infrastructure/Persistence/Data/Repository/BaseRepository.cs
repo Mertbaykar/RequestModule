@@ -3,6 +3,7 @@ using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Request.Module.Domain.Base;
 using Request.Module.Infrastructure.Persistence.Data;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Request.Module.Infrastructure.Persistence.Data.Repository
 {
-    public abstract class BaseRepository<TEntity> : RepositoryBase<TEntity>, IBaseRepository<TEntity> where TEntity : EntityBase<Guid>, IAggregateRoot
+    public abstract class BaseRepository<TEntity> : RepositoryBase<TEntity>, IBaseRepository<TEntity> where TEntity : EntityBaseCustom<Guid>, IAggregateRoot
     {
         protected readonly RequestContext MasterDataDb;
         protected readonly IMapper Mapper;
@@ -30,7 +31,7 @@ namespace Request.Module.Infrastructure.Persistence.Data.Repository
         }
     }
 
-    public interface IBaseRepository<TEntity> : IRepository<TEntity> where TEntity : EntityBase<Guid>, IAggregateRoot
+    public interface IBaseRepository<TEntity> : IRepository<TEntity> where TEntity : EntityBaseCustom<Guid>, IAggregateRoot
     {
         Task<List<TEntity>> GetAll();
     }

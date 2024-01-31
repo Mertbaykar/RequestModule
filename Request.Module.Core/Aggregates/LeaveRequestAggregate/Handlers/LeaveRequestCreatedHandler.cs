@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
-using Request.Module.Application.Aggregates.LeaveRequestAggregate.Events;
+using Request.Module.Domain.Events;
 using Request.Module.Infrastructure.Persistence.Data.Repository;
 
 namespace Request.Module.Application.Aggregates.LeaveRequestAggregate.Handlers

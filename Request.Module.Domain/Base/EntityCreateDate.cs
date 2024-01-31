@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Request.Module.Domain.Base
 {
-    public class EntityCreateDate : EntityBase<Guid>, IAggregateRoot
+    public class EntityCreateDate : EntityBaseCustom<Guid>, IAggregateRoot
     {
         public DateTime CreateDate { get; private set; }
 

@@ -14,8 +14,12 @@ namespace Request.Module.Infrastructure.Persistence.Data.Config
 
 
             builder
+               .Property(x => x.FormNumber)
+               .HasDefaultValueSql("NEXT VALUE FOR RequestFormNumberSequence");
+
+            builder
                 .Property(x => x.RequestFormNumber)
-                 .HasComputedColumnSql("('LRF-' + CONVERT(VARCHAR(50), [FormNumber]))", false);
+                 .HasComputedColumnSql("('LRF-000' + CONVERT(VARCHAR(50), [FormNumber]))", false);
 
             #region Enum
 

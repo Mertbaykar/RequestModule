@@ -1,4 +1,5 @@
 ﻿using Ardalis.SharedKernel;
+using Request.Module.Domain.Base;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Request.Module.Domain
 {
-    public class ADUser : EntityBase<Guid>, IAggregateRoot
+    public class ADUser : EntityBaseCustom<Guid>, IAggregateRoot
     {
         public string FirstName { get; private set; }
         public string LastName { get; private set; }

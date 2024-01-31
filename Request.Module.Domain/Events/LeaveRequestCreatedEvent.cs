@@ -1,7 +1,6 @@
 ﻿using Ardalis.SharedKernel;
-using Request.Module.Domain;
 
-namespace Request.Module.Application.Aggregates.LeaveRequestAggregate.Events
+namespace Request.Module.Domain.Events
 {
     public class LeaveRequestCreatedEvent : DomainEventBase
     {

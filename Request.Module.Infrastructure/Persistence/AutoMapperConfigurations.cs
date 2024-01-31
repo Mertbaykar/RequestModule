@@ -18,7 +18,7 @@ namespace Request.Module.Infrastructure.Persistence
             CreateMap<LeaveRequest, LeaveRequestResponse>()
            .ForMember(dest => dest.CreatedByFullName, opt => opt.MapFrom(src => src.CreatedBy.FullName))
            .ForMember(dest => dest.AssignedUserFullName, opt => opt.MapFrom(src => src.AssignedUser != null ? src.AssignedUser.FullName : string.Empty))
-           .ForMember(dest => dest.TotalHours, opt => opt.MapFrom(src => src.GetTotalHours(src.StartDate, src.EndDate)));
+           .ForMember(dest => dest.TotalHours, opt => opt.MapFrom(src => LeaveRequest.GetTotalHours(src.StartDate, src.EndDate)));
 
 
             CreateMap<CumulativeLeaveRequest, CumulativeLeaveRequestResponse>()

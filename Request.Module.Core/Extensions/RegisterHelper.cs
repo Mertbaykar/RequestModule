@@ -8,6 +8,7 @@ using Request.Module.Application.Base;
 using Request.Module.Infrastructure.Persistence;
 using Request.Module.Infrastructure.Persistence.Data;
 using Request.Module.Infrastructure.Persistence.Data.Repository;
+using System.Reflection;
 
 namespace Request.Module.Application.Extensions
 {
@@ -35,14 +36,15 @@ namespace Request.Module.Application.Extensions
         private static IServiceCollection RegisterEventSpecifics(this IServiceCollection services)
         {
             services.AddScoped<IMediator, Mediator>();
-            services.AddScoped<IDomainEventDispatcher, MediatRDomainEventDispatcher>();
+            services.AddScoped<IDomainEventDispatcherCustom, DomainEventDispatcherCustom>();
+            //services.AddScoped<IDomainEventDispatcher, MediatRDomainEventDispatcher>();
             return services;
         }
 
         private static IServiceCollection RegisterDbContext(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<RequestContext>(options =>
-                      options.UseSqlServer(configuration.GetConnectionString("SqlConnection")));
+                      options.UseSqlServer(configuration.GetConnectionString("SqlConnection"), optionsBuilder => optionsBuilder.MigrationsAssembly("Request.Module.Web")));
             return services;
         }
 
